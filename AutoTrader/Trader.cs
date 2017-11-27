@@ -27,7 +27,6 @@ namespace AutoTrader
         private DateTime _lastReceivedTime = DateTime.UtcNow;
         private double _positionPrice;
 
-
         public Trader(CommandLineOptions options)
         {
             _privateApi = new PrivateApi(options.ApiKey, options.ApiSecret);
@@ -259,7 +258,6 @@ namespace AutoTrader
 
                 Thread.Sleep(LoopSpan);
             }
-            // ReSharper disable once FunctionNeverReturns
         }
 
         private struct PriceAndSize
