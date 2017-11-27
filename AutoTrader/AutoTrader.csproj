@@ -69,9 +69,6 @@
   <ItemGroup>
     <Compile Include="AutoTraderEnums.cs" />
     <Compile Include="CommandLineOptions.cs" />
-    <Compile Include="DateTimeConstants.cs" />
-    <Compile Include="Extensions\DateTimeExtensions.cs" />
-    <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="Formula.cs" />
