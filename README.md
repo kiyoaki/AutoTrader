@@ -1,5 +1,5 @@
 # AutoTrader
-BTC FX Trading Software Sample for bitFlyer
+The sample of BTC FX trading software for bitFlyer.
 
 ## Getting Started
 
