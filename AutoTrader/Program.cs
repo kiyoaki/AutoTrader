@@ -1,7 +1,9 @@
-﻿using System;
-using System.Threading;
-using AutoTrader.Extensions;
+﻿using AutoTrader.Extensions;
 using CommandLine;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
+using System;
+using System.Threading;
 
 namespace AutoTrader
 {
@@ -11,12 +13,21 @@ namespace AutoTrader
 
         private static void Main(string[] args)
         {
-            var options = new CommandLineOptions();
-            if (Parser.Default.ParseArguments(args, options))
+            var loggerFactory = new LoggerFactory();
+            loggerFactory.AddNLog(new NLogProviderOptions
             {
-                new Trader(options).Start(CancellationToken).FireAndForget();
-            }
+                CaptureMessageTemplates = true,
+                CaptureMessageProperties = true
+            });
+            loggerFactory.ConfigureNLog("nlog.config");
 
+            var logger = loggerFactory.CreateLogger("default");
+
+            Parser.Default.ParseArguments<CommandLineOptions>(args)
+                .WithParsed(options =>
+                {
+                    new Trader(options).Start(CancellationToken).FireAndForget();
+                });
             Console.ReadKey();
         }
     }

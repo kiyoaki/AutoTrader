@@ -1,4 +1,5 @@
 ﻿using BitFlyer.Apis;
+using Microsoft.Extensions.Logging;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace AutoTrader
     {
         private const double MinOrderSize = 0.001;
         private static readonly TimeSpan LoopSpan = TimeSpan.FromSeconds(10);
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger<Trader> Logger = CustomLoggerFactory.Create<Trader>();
 
         private readonly PrivateApi _privateApi;
         private readonly double _betting;
@@ -42,12 +43,13 @@ namespace AutoTrader
                     _lastReceivedTime = DateTime.UtcNow;
                     _latestTicker = ticker;
                 },
-                message => { Logger.Info(message); },
+                message => { Logger.LogInformation(message); },
                 (message, ex) =>
                 {
-                    Logger.Info(message);
                     if (ex != null)
-                        Logger.Info(ex);
+                        Logger.LogInformation(ex, message);
+                    else
+                        Logger.LogInformation(message);
                 });
 
             return Task.Factory.StartNew(CoreLoop, cancellationToken, TaskCreationOptions.LongRunning,
@@ -60,7 +62,7 @@ namespace AutoTrader
             {
                 var now = DateTime.UtcNow;
 
-                Logger.Info("Last Receive: " + _lastReceivedTime);
+                Logger.LogInformation("Last Receive: " + _lastReceivedTime);
 
                 if (now - _lastReceivedTime < TimeSpan.FromSeconds(3) && _latestTicker != null)
                 {
@@ -96,7 +98,7 @@ namespace AutoTrader
                         if (before != after)
                             _positionStartTime = now;
                         else if (_position != Position.None && _positionStartTime != null)
-                            Logger.Info("Position TimeSpan: " + (now - _positionStartTime.Value));
+                            Logger.LogInformation("Position TimeSpan: " + (now - _positionStartTime.Value));
 
                         _orderSide = null;
                         _orderSize = 0;
@@ -108,7 +110,7 @@ namespace AutoTrader
                             }
 
                         var result = _analyzer.Analyze(_position, _positionPrice, _latestTicker, now);
-                        Logger.Info("Analyze Result: " + result);
+                        Logger.LogInformation("Analyze Result: " + result);
                         var canBet = _betting - _positionSize;
                         switch (result)
                         {
@@ -235,26 +237,26 @@ namespace AutoTrader
                     }
                     catch (Exception ex)
                     {
-                        Logger.Error(ex, ex.Message);
+                        Logger.LogError(ex, ex.Message);
                         if (ex.InnerException != null)
                         {
-                            Logger.Error(ex.InnerException, "InnerException: " + ex.InnerException.Message);
+                            Logger.LogError(ex.InnerException, "InnerException: " + ex.InnerException.Message);
                             if (ex.InnerException.InnerException != null)
                             {
-                                Logger.Error(ex.InnerException.InnerException,
+                                Logger.LogError(ex.InnerException.InnerException,
                                     "InnerException: " + ex.InnerException.InnerException.Message);
                             }
                         }
                     }
 
-                    Logger.Info("position: " + _position);
-                    Logger.Info("positionSize: " + _positionSize);
+                    Logger.LogInformation("position: " + _position);
+                    Logger.LogInformation("positionSize: " + _positionSize);
 
-                    Logger.Info("orderSide: " + _orderSide);
-                    Logger.Info("orderSize: " + _orderSize);
+                    Logger.LogInformation("orderSide: " + _orderSide);
+                    Logger.LogInformation("orderSize: " + _orderSize);
                 }
 
-                Logger.Info("------------------------------");
+                Logger.LogInformation("------------------------------");
 
                 Thread.Sleep(LoopSpan);
             }
