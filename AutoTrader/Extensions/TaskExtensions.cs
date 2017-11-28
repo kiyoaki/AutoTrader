@@ -7,7 +7,7 @@ namespace AutoTrader.Extensions
 {
     public static class TaskExtensions
     {
-        private static readonly ILogger<TickerAnalyzer> Logger = CustomLoggerFactory.Create<TickerAnalyzer>();
+        private static readonly ILogger Logger = CustomLoggerFactory.Create("TaskExtensions");
 
         public static void FireAndForget(this Task task, string additionalMessage = null)
         {

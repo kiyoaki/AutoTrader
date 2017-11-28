@@ -16,5 +16,17 @@ namespace AutoTrader
             loggerFactory.ConfigureNLog("nlog.config");
             return loggerFactory.CreateLogger<T>();
         }
+
+        public static ILogger Create(string categoryName)
+        {
+            var loggerFactory = new LoggerFactory();
+            loggerFactory.AddNLog(new NLogProviderOptions
+            {
+                CaptureMessageTemplates = true,
+                CaptureMessageProperties = true
+            });
+            loggerFactory.ConfigureNLog("nlog.config");
+            return loggerFactory.CreateLogger(categoryName);
+        }
     }
 }
