@@ -3,7 +3,14 @@ BTC FX Trading Software Sample for bitFlyer
 
 ## Getting Started
 
+### Download and install .NET SDK
+
+To start building .NET Core apps, you just need to download and install .NET SDK.
+https://www.microsoft.com/net/learn/get-started/windows
+
 ### Create release build
+
+In AutoTrader.csproj directory, execute this command.
 
 ```
 dotnet publish -f netcoreapp2.0 -c Release
