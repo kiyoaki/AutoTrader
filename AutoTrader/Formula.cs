@@ -27,7 +27,7 @@ namespace AutoTrader
                     totalLoss += profitOrLoss;
             }
 
-            return Math.Abs(100d * totalProfit / (totalProfit - totalLoss));
+            return 100d * totalProfit / (totalProfit - totalLoss);
         }
 
         public static IEnumerable<double> RSI(this IEnumerable<double> source, int period)
