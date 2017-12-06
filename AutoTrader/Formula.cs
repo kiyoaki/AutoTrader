@@ -27,7 +27,7 @@ namespace AutoTrader
                     totalLoss += profitOrLoss;
             }
 
-            return 100 * totalProfit / (totalProfit + -totalLoss);
+            return Math.Abs(100d * totalProfit / (totalProfit - totalLoss));
         }
 
         public static IEnumerable<double> RSI(this IEnumerable<double> source, int period)
@@ -126,7 +126,7 @@ namespace AutoTrader
                 macdSignal = macd * signalAlpha + macdSignal * (1 - signalAlpha);
             }
 
-            return new MACD {Slow = macdSlow, Value = macd, Signal = macdSignal};
+            return new MACD { Slow = macdSlow, Value = macd, Signal = macdSignal };
         }
 
         public static IEnumerable<MACD> MACD(this IEnumerable<double> source, int period, int signalPeriod)
