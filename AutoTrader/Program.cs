@@ -13,15 +13,10 @@ namespace AutoTrader
 
         private static void Main(string[] args)
         {
-            var loggerFactory = new LoggerFactory();
-            loggerFactory.AddNLog(new NLogProviderOptions
-            {
-                CaptureMessageTemplates = true,
-                CaptureMessageProperties = true
-            });
-            loggerFactory.ConfigureNLog("nlog.config");
-
-            var logger = loggerFactory.CreateLogger("default");
+            var config = new NLog.Config.LoggingConfiguration();
+            var logconsole = new NLog.Targets.ConsoleTarget("logconsole");
+            config.AddRule(NLog.LogLevel.Info, NLog.LogLevel.Fatal, logconsole);
+            NLog.LogManager.Configuration = config;
 
             Parser.Default.ParseArguments<CommandLineOptions>(args)
                 .WithParsed(options =>

@@ -1,6 +1,5 @@
 ﻿using BitFlyer.Apis;
 using Microsoft.Extensions.Logging;
-using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +12,7 @@ namespace AutoTrader
     {
         private const double MinOrderSize = 0.001;
         private static readonly TimeSpan LoopSpan = TimeSpan.FromSeconds(10);
-        private static readonly ILogger<Trader> Logger = CustomLoggerFactory.Create<Trader>();
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly PrivateApi _privateApi;
         private readonly double _betting;
@@ -37,19 +36,19 @@ namespace AutoTrader
 
         public Task Start(CancellationToken cancellationToken)
         {
-            new RealtimeApi().Subscribe<Ticker>(PubnubChannel.TickerFxBtcJpy,
+            new RealtimeApi().Subscribe<Ticker>(RealtimeChannel.TickerFxBtcJpy,
                 ticker =>
                 {
                     _lastReceivedTime = DateTime.UtcNow;
                     _latestTicker = ticker;
                 },
-                message => { Logger.LogInformation(message); },
+                () => { Logger.Info("connected."); },
                 (message, ex) =>
                 {
                     if (ex != null)
-                        Logger.LogInformation(ex, message);
+                        Logger.Info(ex, message);
                     else
-                        Logger.LogInformation(message);
+                        Logger.Info(message);
                 });
 
             return Task.Factory.StartNew(CoreLoop, cancellationToken, TaskCreationOptions.LongRunning,
@@ -62,7 +61,7 @@ namespace AutoTrader
             {
                 var now = DateTime.UtcNow;
 
-                Logger.LogInformation("Last Receive: " + _lastReceivedTime);
+                Logger.Info("Last Receive: " + _lastReceivedTime);
 
                 if (now - _lastReceivedTime < TimeSpan.FromSeconds(3) && _latestTicker != null)
                 {
@@ -98,7 +97,7 @@ namespace AutoTrader
                         if (before != after)
                             _positionStartTime = now;
                         else if (_position != Position.None && _positionStartTime != null)
-                            Logger.LogInformation("Position TimeSpan: " + (now - _positionStartTime.Value));
+                            Logger.Info("Position TimeSpan: " + (now - _positionStartTime.Value));
 
                         _orderSide = null;
                         _orderSize = 0;
@@ -110,7 +109,7 @@ namespace AutoTrader
                             }
 
                         var result = _analyzer.Analyze(_position, _positionPrice, _latestTicker, now);
-                        Logger.LogInformation("Analyze Result: " + result);
+                        Logger.Info("Analyze Result: " + result);
                         var canBet = _betting - _positionSize;
                         switch (result)
                         {
@@ -237,26 +236,26 @@ namespace AutoTrader
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError(ex, ex.Message);
+                        Logger.Error(ex, ex.Message);
                         if (ex.InnerException != null)
                         {
-                            Logger.LogError(ex.InnerException, "InnerException: " + ex.InnerException.Message);
+                            Logger.Error(ex.InnerException, "InnerException: " + ex.InnerException.Message);
                             if (ex.InnerException.InnerException != null)
                             {
-                                Logger.LogError(ex.InnerException.InnerException,
+                                Logger.Error(ex.InnerException.InnerException,
                                     "InnerException: " + ex.InnerException.InnerException.Message);
                             }
                         }
                     }
 
-                    Logger.LogInformation("position: " + _position);
-                    Logger.LogInformation("positionSize: " + _positionSize);
+                    Logger.Info("position: " + _position);
+                    Logger.Info("positionSize: " + _positionSize);
 
-                    Logger.LogInformation("orderSide: " + _orderSide);
-                    Logger.LogInformation("orderSize: " + _orderSize);
+                    Logger.Info("orderSide: " + _orderSide);
+                    Logger.Info("orderSize: " + _orderSize);
                 }
 
-                Logger.LogInformation("------------------------------");
+                Logger.Info("------------------------------");
 
                 Thread.Sleep(LoopSpan);
             }

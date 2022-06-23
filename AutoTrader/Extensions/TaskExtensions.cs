@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -7,7 +6,7 @@ namespace AutoTrader.Extensions
 {
     public static class TaskExtensions
     {
-        private static readonly ILogger Logger = CustomLoggerFactory.Create("TaskExtensions");
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
         public static void FireAndForget(this Task task, string additionalMessage = null)
         {
@@ -15,9 +14,9 @@ namespace AutoTrader.Extensions
             task.ContinueWith(x =>
             {
                 if (x.Exception != null)
-                    Logger.LogError(x.Exception, $"TaskUnhandled {additionalMessage}: {x.Exception.Message}");
+                    Logger.Error(x.Exception, $"TaskUnhandled {additionalMessage}: {x.Exception.Message}");
                 else
-                    Logger.LogError("TaskUnhandled {0} ", additionalMessage);
+                    Logger.Error("TaskUnhandled {0} ", additionalMessage);
             }, TaskContinuationOptions.OnlyOnFaulted);
         }
 

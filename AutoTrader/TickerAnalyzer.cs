@@ -1,7 +1,5 @@
 ﻿using BitFlyer.Apis;
 using MathNet.Numerics.Statistics;
-using Microsoft.Extensions.Logging;
-using NLog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -14,7 +12,7 @@ namespace AutoTrader
         private const int MaxLength = 1024;
         private const int ResearchCount = 100;
 
-        private static readonly ILogger<TickerAnalyzer> Logger = CustomLoggerFactory.Create<TickerAnalyzer>();
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly ConcurrentQueue<Ticker> _tickers = new ConcurrentQueue<Ticker>();
         private readonly ConcurrentQueue<double> _priceMovements = new ConcurrentQueue<double>();
@@ -28,8 +26,8 @@ namespace AutoTrader
             if (bitFlyer == null)
                 return AnalysisResult.Hold;
 
-            Logger.LogInformation("Price: " + bitFlyer.LatestPrice);
-            Logger.LogInformation("Volume: " + bitFlyer.Volume);
+            Logger.Info("Price: " + bitFlyer.LatestPrice);
+            Logger.Info("Volume: " + bitFlyer.Volume);
 
             EnqueueTicker(bitFlyer);
 
@@ -41,20 +39,20 @@ namespace AutoTrader
                 Thirty = prices.LastEMA(30)
             };
             EnqueueEMA(ema);
-            Logger.LogInformation(ema.ToString());
+            Logger.Info(ema.ToString());
 
             var priceMovement = GetPriceMovement(_emas.Select(x => x.Ten).ToArray(), 10);
             EnqueuePriceMovement(priceMovement);
 
             if (_tickers.Count < ResearchCount)
             {
-                Logger.LogInformation("##TickerLength##" + _tickers.Count);
+                Logger.Info("##TickerLength##" + _tickers.Count);
                 return AnalysisResult.Hold;
             }
 
             var priceTrend = GetPriceTrend(priceMovement);
 
-            Logger.LogInformation("Price Trend: " + priceTrend);
+            Logger.Info("Price Trend: " + priceTrend);
 
             switch (position)
             {
@@ -166,9 +164,9 @@ namespace AutoTrader
             if (Math.Abs(_priceMovementStandardDev) > 0d)
                 separation = (priceMovement - _priceMovementAverage) / _priceMovementStandardDev;
 
-            Logger.LogInformation("PriceMovement          : " + priceMovement);
-            Logger.LogInformation("PriceMovement Average  : " + _priceMovementAverage);
-            Logger.LogInformation("PriceMovement Statistic: " + separation);
+            Logger.Info("PriceMovement          : " + priceMovement);
+            Logger.Info("PriceMovement Average  : " + _priceMovementAverage);
+            Logger.Info("PriceMovement Statistic: " + separation);
 
             var priceMoveStatsAbs = Math.Abs(separation);
 
